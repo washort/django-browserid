@@ -1,6 +1,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import json
 import logging
 from datetime import datetime
 
@@ -185,13 +186,15 @@ class RemoteVerifier(object):
             :class:`.BrowserIDException`: Error connecting to the remote verification service, or
             error parsing the response received from the service.
         """
+        data = {
+            'assertion': assertion,
+            'audience': audience,
+        }
+        data.update(kwargs)
         parameters = dict(self.requests_parameters, **{
-            'data': {
-                'assertion': assertion,
-                'audience': audience,
-            }
+            'data': json.dumps(data),
+            'headers': {'Content-Type': 'application/json'},
         })
-        parameters['data'].update(kwargs)
 
         try:
             response = requests.post(self.verification_service_url, **parameters)
